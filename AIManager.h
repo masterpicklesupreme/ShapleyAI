@@ -24,11 +24,17 @@ public:
 class Network
 {
 	default_random_engine re{};
+	//std::random_device rd{};
+	//std::mt19937 gen{ rd() };
+	
+	// note that each layer only knows the weights connecting it and the layer behind it. The layer behind does not know the weights going forward.
 	void PopulateLayerWithValues(int lowWeightRange, int highWeightRange, int lowBiasRange, int highBiasRange, Layer& layer, Layer& lastLayer)
 	{
+		std::normal_distribution<double> d{ 0, 1.0/lastLayer.numOfNeurons };
 		//srand(time(NULL));
 		uniform_real_distribution<double> weightRange{ (double)lowWeightRange, (double)highWeightRange };
 		uniform_real_distribution<double> biasRange{ (double)lowBiasRange, (double)highBiasRange };
+
 
 		vector<double> temp;
 		//int weightRange = highWeightRange - lowWeightRange;
@@ -39,7 +45,8 @@ class Network
 			{
 				//temp.push_back(rand() % (weightRange + 1) + lowWeightRange);
 				//temp.push_back(lowWeightRange + (rand() / (RAND_MAX / (weightRange))));
-				temp.push_back(weightRange(re));
+				//temp.push_back(weightRange(re));
+				temp.push_back(d(re));
 			}
 			layer.weights.push_back(temp);
 			temp.clear();
@@ -49,7 +56,8 @@ class Network
 		{
 			//layer.biases.push_back(rand() % (biasRange + 1) + lowBiasRange);
 			//layer.biases.push_back(lowBiasRange + (rand() / (RAND_MAX / (biasRange))));
-			layer.biases.push_back(biasRange(re));
+			//layer.biases.push_back(biasRange(re));
+			layer.biases.push_back(0);
 		}
 	}
 	
@@ -383,12 +391,16 @@ public:
 			//efficient than getting size of the weights matrix
 			for (int x = 0; x < layers[i - 1].numOfNeurons; x++)
 			{
+				//std::cout << x << endl;
 				// here is same but the lengths of all these vectors would be the number of how many neurons in current layers
 				for (int y = 0; y < layers[i].numOfNeurons; y++)
 				{
 					// even now, while writing this, i barely understand how it works. i have a vague, thin thread of logic in my head that suggests it might.
-					calculatedLayer[y] += layers[i - 1].activations[x] * layers[i].weights[x][y];
+					calculatedLayer[y] += (layers[i - 1].activations[x] * layers[i].weights[x][y]);
+					//std::cout << layers[i - 1].activations[x] * layers[i].weights[x][y] << "   ";
+					//std::cout << "x: " << x << " y: " << y;
 				}
+				//std::cout << endl << endl;
 			}
 
 			// apply activation function
@@ -447,7 +459,7 @@ public:
 				for (int y = 0; y < layers[i].numOfNeurons; y++)
 				{
 					// even now, while writing this, i barely understand how it works. i have a vague, thin thread of logic in my head that suggests it might.
-					calculatedLayer[y] += layers[i - 1].activations[x] * layers[i].weights[x][y];
+					calculatedLayer[y] += (layers[i - 1].activations[x] * layers[i].weights[x][y]);
 				}
 			}
 			valuesBeforeApplyingActivationFunction.push_back(calculatedLayer);

@@ -12,11 +12,11 @@ using namespace std;
 
 int main()
 {
-    default_random_engine re;
-    re.seed(time(NULL));
+    default_random_engine randomEngine;
+    randomEngine.seed(time(NULL));
 
     ShapleyValueGenerator shapleyValueGenerator;
-    vector<double> characterTable = shapleyValueGenerator.CreateRandomCharacterTable(re);
+    vector<double> characterTable = shapleyValueGenerator.CreateRandomCharacterTable(randomEngine);
 
     std::cout << "characteristic function: " << endl;
     for (int i = 0; i < characterTable.size(); i++)
@@ -33,9 +33,9 @@ int main()
         std::cout << shapleyValues[i] << " ";
     }
     std::cout << endl;
-    vector<int> testNetwork = { 65, 50, 50, 6 };;
+    vector<int> networkLayerSizes = { 65, 50, 50, 6 };
 
-    Network network = Network(testNetwork, leakyrelu_function, leakyrelu_function, -2, 1, -4, 2);
+    Network network = Network(networkLayerSizes, leakyrelu_function, leakyrelu_function, -1, 0.5, -4, 2);
 
     vector<double> testInputs = characterTable;
     for (int i = testInputs.size(); i < 64 ; i++)
@@ -60,94 +60,127 @@ int main()
     vector<double> tempIn;
     vector<double> tempOut;
 
-    ifstream inputTrainingDataFile;
+    // if you want file stuff to go on, then uncomment the below. however you will need to recomment the "get training data" for loop (below) so as to not do that twice and make problems.
+    //ifstream inputTrainingDataFile;
 
-    inputTrainingDataFile.open("inputtrainingdata.txt");
+    //inputTrainingDataFile.open("inputtrainingdata.txt");
 
-    ifstream outputTrainingDataFile;
+    //ifstream outputTrainingDataFile;
 
-    outputTrainingDataFile.open("outputtrainingdata.txt");
+    //outputTrainingDataFile.open("outputtrainingdata.txt");
 
-    if (inputTrainingDataFile)
+    //if (inputTrainingDataFile)
+    //{
+    //    string temp;
+    //    vector<double> tempList;
+    //    stringstream line;
+
+    //    while (getline(inputTrainingDataFile, temp))
+    //    {
+    //        temp.pop_back();
+    //        line << temp;
+    //        while (getline(line, temp, ',' ))
+    //        {
+    //            tempList.push_back(stod(temp));
+    //        }
+    //        inputData.push_back(tempList);
+    //        tempList.clear();
+    //        line.clear();
+    //    }
+
+    //    while (getline(outputTrainingDataFile, temp))
+    //    {
+    //        temp.pop_back();
+    //        line << temp;
+    //        while (getline(line, temp, ','))
+    //        {
+    //            tempList.push_back(stod(temp));
+    //        }
+    //        outputData.push_back(tempList);
+    //        tempList.clear();
+    //        line.clear();
+    //    }
+    //}
+    //else
+    //{
+    //    // get training data
+    //    for (int i = 0; i < 95; i++)
+    //    {
+    //        // get raw input and output data
+    //        //inputData.push_back(shapleyValueGenerator.CreateRandomCharacterTable(re));
+    //        //outputData.push_back(shapleyValueGenerator.CalculateShapleyValues(inputData[i]));
+    //        tempIn = shapleyValueGenerator.CreateRandomCharacterTable(randomEngine);
+    //        tempOut = shapleyValueGenerator.CalculateShapleyValues(tempIn);
+
+    //        // parse them for the network
+    //        for (int x = tempIn.size(); x < 64; x++)
+    //        {
+    //            tempIn.push_back(0.0);
+    //        }
+    //        tempIn.push_back(shapleyValueGenerator.numOfAgents);
+    //        inputData.push_back(tempIn);
+    //        tempIn.clear();
+
+    //        for (int x = shapleyValueGenerator.numOfAgents - 1; x < 6; x++)
+    //        {
+    //            tempOut.push_back(0.0);
+    //        }
+    //        tempOut.push_back(shapleyValueGenerator.numOfAgents);
+    //        outputData.push_back(tempOut);
+    //        tempOut.clear();
+    //    }
+
+    //    ofstream newInputTrainingDataFile("inputtrainingdata.txt");
+    //    for (int i = 0; i < inputData.size(); i++)
+    //    {
+    //        for (int x = 0; x < inputData[i].size(); x++)
+    //        {
+    //            newInputTrainingDataFile << to_string(inputData[i][x]) << ",";
+    //        }
+    //        newInputTrainingDataFile << endl;
+    //    }
+
+    //    ofstream newOutputTrainingDataFile("outputtrainingdata.txt");
+    //    for (int i = 0; i < outputData.size(); i++)
+    //    {
+    //        for (int x = 0; x < outputData[i].size(); x++)
+    //        {
+    //            newOutputTrainingDataFile << to_string(outputData[i][x]) << ",";
+    //        }
+    //        newOutputTrainingDataFile << endl;
+    //    }
+    //}
+
+    // get training data
+    int trainingExamples = 10000;
+    for (int i = 0; i < trainingExamples; i++)
     {
-        string temp;
-        vector<double> tempList;
-        stringstream line;
-
-        while (getline(inputTrainingDataFile, temp))
+        if (i % 100 == 0)
         {
-            temp.pop_back();
-            line << temp;
-            while (getline(line, temp, ',' ))
-            {
-                tempList.push_back(stod(temp));
-            }
-            inputData.push_back(tempList);
-            tempList.clear();
-            line.clear();
+            std::cout << i << endl;
         }
+        // get raw input and output data
+        //inputData.push_back(shapleyValueGenerator.CreateRandomCharacterTable(re));
+        //outputData.push_back(shapleyValueGenerator.CalculateShapleyValues(inputData[i]));
+        tempIn = shapleyValueGenerator.CreateRandomCharacterTable(randomEngine);
+        tempOut = shapleyValueGenerator.CalculateShapleyValues(tempIn);
 
-        while (getline(outputTrainingDataFile, temp))
+        // parse them for the network
+        for (int x = tempIn.size(); x < 64; x++)
         {
-            temp.pop_back();
-            line << temp;
-            while (getline(line, temp, ','))
-            {
-                tempList.push_back(stod(temp));
-            }
-            outputData.push_back(tempList);
-            tempList.clear();
-            line.clear();
+            tempIn.push_back(0.0);
         }
-    }
-    else
-    {
-        // get training data
-        for (int i = 0; i < 95; i++)
+        tempIn.push_back(shapleyValueGenerator.numOfAgents);
+        inputData.push_back(tempIn);
+        tempIn.clear();
+
+        for (int x = shapleyValueGenerator.numOfAgents - 1; x < 6; x++)
         {
-            // get raw input and output data
-            //inputData.push_back(shapleyValueGenerator.CreateRandomCharacterTable(re));
-            //outputData.push_back(shapleyValueGenerator.CalculateShapleyValues(inputData[i]));
-            tempIn = shapleyValueGenerator.CreateRandomCharacterTable(re);
-            tempOut = shapleyValueGenerator.CalculateShapleyValues(tempIn);
-
-            // parse them for the network
-            for (int x = tempIn.size(); x < 64; x++)
-            {
-                tempIn.push_back(0.0);
-            }
-            tempIn.push_back(shapleyValueGenerator.numOfAgents);
-            inputData.push_back(tempIn);
-            tempIn.clear();
-
-            for (int x = shapleyValueGenerator.numOfAgents - 1; x < 6; x++)
-            {
-                tempOut.push_back(0.0);
-            }
-            tempOut.push_back(shapleyValueGenerator.numOfAgents);
-            outputData.push_back(tempOut);
-            tempOut.clear();
+            tempOut.push_back(0.0);
         }
-
-        ofstream newInputTrainingDataFile("inputtrainingdata.txt");
-        for (int i = 0; i < inputData.size(); i++)
-        {
-            for (int x = 0; x < inputData[i].size(); x++)
-            {
-                newInputTrainingDataFile << to_string(inputData[i][x]) << ",";
-            }
-            newInputTrainingDataFile << endl;
-        }
-
-        ofstream newOutputTrainingDataFile("outputtrainingdata.txt");
-        for (int i = 0; i < outputData.size(); i++)
-        {
-            for (int x = 0; x < outputData[i].size(); x++)
-            {
-                newOutputTrainingDataFile << to_string(outputData[i][x]) << ",";
-            }
-            newOutputTrainingDataFile << endl;
-        }
+        tempOut.push_back(shapleyValueGenerator.numOfAgents);
+        outputData.push_back(tempOut);
+        tempOut.clear();
     }
 
     // make the network train on the training data
@@ -157,7 +190,7 @@ int main()
 
     std::cout << "done training" << endl << endl;
 
-    characterTable = shapleyValueGenerator.CreateRandomCharacterTable(re);
+    characterTable = shapleyValueGenerator.CreateRandomCharacterTable(randomEngine);
 
     std::cout << "characteristic function: " << endl;
     for (int i = 0; i < characterTable.size(); i++)
@@ -189,6 +222,58 @@ int main()
     {
         std::cout << results[i] << " ";
     }
+    std::cout << endl << endl;
+    std::cout << "layer 1 biases: " << endl;
+    for (int i = 0; i < network.layers[1].biases.size(); i++)
+    {
+        std::cout << network.layers[1].biases[i] << ", ";
+    }
+    std::cout << endl;
+    std::cout << "layer 2 biases: " << endl;
+    for (int i = 0; i < network.layers[2].biases.size(); i++)
+    {
+        std::cout << network.layers[2].biases[i] << ", ";
+    }
+    std::cout << endl;
+    std::cout << "layer 3 biases: " << endl;
+    for (int i = 0; i < network.layers[3].biases.size(); i++)
+    {
+        std::cout << network.layers[3].biases[i] << ", ";
+    }
+    std::cout << endl << endl;
+
+    std::cout << "layer 1 weights: " << endl;
+    for (int i = 0; i < network.layers[1].weights.size(); i++)
+    {
+        std::cout << "i: " << i << endl;
+        for (int j = 0; j < network.layers[1].weights[i].size(); j++)
+        {
+            std::cout << network.layers[1].weights[i][j] << ", ";
+        }
+        std::cout << endl;
+    }
+    std::cout << endl;
+    std::cout << "layer 2 weights: " << endl;
+    for (int i = 0; i < network.layers[2].weights.size(); i++)
+    {
+        for (int j = 0; j < network.layers[2].weights[i].size(); j++)
+        {
+            std::cout << network.layers[2].weights[i][j] << ", ";
+        }
+    }
+    std::cout << endl;
+    std::cout << "layer 3 weights: " << endl;
+    for (int i = 0; i < network.layers[3].weights.size(); i++)
+    {
+        for (int j = 0; j < network.layers[3].weights[i].size(); j++)
+        {
+            std::cout << network.layers[3].weights[i][j] << ", ";
+        }
+    }
+    std::cout << endl;
+
+
+
 
     //vector<vector<vector<vector<int>>>> test;
     //vector<vector<vector<int>>> addedTest;

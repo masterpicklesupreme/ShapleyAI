@@ -70,7 +70,7 @@ public:
 
 				for (int neuron = 0; neuron < network.layers[network.networkSizeMinus1].numOfNeurons; neuron++)
 				{
-					// get the derivatives for cost in terms of last layer neurons (there is some problem here)
+					// get the derivatives for cost in terms of last layer neurons
 					lastLayerActivationDerivatives.push_back(2 * (network.layers[network.networkSizeMinus1].activations[neuron] - outputTrainingData[currentTrainingExample][neuron]));
 
 					//std::cout << 2 * (network.layers[network.networkSizeMinus1].activations[neuron] - outputTrainingData[currentTrainingExample][neuron]) << "   ";
@@ -120,6 +120,7 @@ public:
 				}
 				std::cout << endl << endl << endl;*/
 
+				// this for loop gets the derivatives of the weights in terms of the cost and the next layer's activations in terms of the cost
 				for (int lastLayerNeuron = 0; lastLayerNeuron < network.layers[networkSizeMinus2].numOfNeurons; lastLayerNeuron++)
 				{
 					// there used to be a shitty useless explanation of this, instead i have graced you with a better explanation now: need to start off each element here with 0 as it is additively...
@@ -129,11 +130,13 @@ public:
 					{
 						//std::cout << network.layers[networkSizeMinus2].activations[lastLayerNeuron] * activationBeforeFunctionDerivatives[currentLayerNeuron] * lastLayerActivationDerivatives[currentLayerNeuron] << "    ";
 						//std::cout << lastLayerActivationDerivatives[currentLayerNeuron] << "    ";
+						// now get the derivatives of the weight in terms of the cost
 						// weights are not immediately being updated, neither is anything else. this is because all the derivatives of everything have to be averaged across multiple training examples.
 						tempWeightDerivatives.push_back(network.layers[networkSizeMinus2].activations[lastLayerNeuron]
 							* activationBeforeFunctionDerivatives[currentLayerNeuron]
 							* lastLayerActivationDerivatives[currentLayerNeuron]);
 
+						// now get the derivatives of the next layers activations in terms of the cost
 						// this is done because the next layer's activations affect the cost function through multiple avenues. so, the derivative must be summed up among every avenue.
 						currentLayerActivationDerivatives[lastLayerNeuron] += (network.layers[network.networkSizeMinus1].weights[lastLayerNeuron][currentLayerNeuron]
 							* activationBeforeFunctionDerivatives[currentLayerNeuron]
@@ -144,6 +147,7 @@ public:
 					tempWeightDerivatives.clear();
 				}
 
+				// get the derivatives of the biases in terms of the cost
 				// loop through biases separately from weights and activations because weights and activations go through current layer neurons for every previous layer neuron. not needed for biases
 				for (int neuron = 0; neuron < network.layers[network.networkSizeMinus1].numOfNeurons; neuron++)
 				{
